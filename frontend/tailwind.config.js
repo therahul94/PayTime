@@ -13,6 +13,9 @@ export default {
       },
       height: {
         "475px": "475px"
+      },
+      spacing: {
+        '128': '32rem'
       }
     },
   },
