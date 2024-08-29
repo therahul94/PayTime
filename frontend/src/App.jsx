@@ -5,7 +5,6 @@ import Dashboard from "./Pages/Dashboard"
 import SendMoney from "./Pages/SendMoney"
 
 function App() {
-
   return (
     <>
         <BrowserRouter>

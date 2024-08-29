@@ -2,6 +2,7 @@ import React from 'react'
 
 export default function SendMoney(){
   return (
+    
     <div className='bg-slate-300 h-screen flex justify-center items-center'>
       <div className='w-80 md:w-128 h-max rounded-md bg-white p-5 text-center'>
         <div className='font-bold text-2xl mt-5 mb-10'>Send Money</div>
