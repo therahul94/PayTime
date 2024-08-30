@@ -68,7 +68,7 @@ const signin = async (req, res) => {
     });
     if (!findUser) {
       return res
-        .status(411)
+        .status(401)
         .json({ message: "Username not available! Please signup" });
     }
 
@@ -79,7 +79,7 @@ const signin = async (req, res) => {
     );
     if (!isVerified) {
       return res
-        .status(411)
+        .status(401)
         .json({ message: "Access Denied! Invalid password" });
     }
 

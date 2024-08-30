@@ -13,7 +13,7 @@ export default function Signup() {
   const [username, setusername] = useState("");
   const [password, setPassword] = useState("");
 
-  const signup = async () => {
+  const signupFn = async () => {
     try {
       const config = {
         url: "/user/signup",
@@ -98,7 +98,7 @@ export default function Signup() {
               />
             </div>
             <div className="mt-5">
-              <Button label={"Sign up"} onClick={signup} />
+              <Button label={"Sign up"} onClick={signupFn} />
             </div>
             <div>
               <BottomWarning

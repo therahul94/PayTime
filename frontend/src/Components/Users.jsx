@@ -10,17 +10,10 @@ export default function Users() {
       lastName: "Kurmalkar",
       id: 1,
     },
-    {
-      firstName: "Sarang",
-      lastName: "Kurmalkar",
-      id: 2,
-    },
-    {
-      firstName: "Tarang",
-      lastName: "Kurmalkar",
-      id: 3,
-    },
   ]);
+
+  
+
   return (
     <div>
       <div className="font-bold text-xl my-3">Users</div>
