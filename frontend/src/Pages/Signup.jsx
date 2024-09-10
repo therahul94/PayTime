@@ -6,8 +6,10 @@ import InputComponents from "../Components/InputComponents";
 import SubHeading from "../Components/SubHeading";
 import Swal from "sweetalert2";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function Signup() {
+  const navigate = useNavigate();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [username, setusername] = useState("");
@@ -19,6 +21,7 @@ export default function Signup() {
         url: "/user/signup",
         method: "post",
         baseURL: "http://localhost:8000/api/v1",
+        // baseURL: "http://192.168.191.214:8000/api/v1",
         headers: {
           "content-type": "application/json",
         },
@@ -37,12 +40,17 @@ export default function Signup() {
         setLastName("");
         setusername("");
         setPassword("");
-        return Swal.fire({
+        setTimeout(()=>{
+          navigate("/signin");
+        }, 1500);
+        Swal.fire({
           icon: "success",
           title: response.data.message,
           showConfirmButton: false,
           timer: 1500,
         });
+        
+        return;
       }
      
     } catch (error) {

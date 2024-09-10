@@ -36,7 +36,7 @@ const signup = async (req, res) => {
 
   const jwttoken = jwt.sign({ userId: createNewUser._id }, JWT_SECRET);
   if (createNewUser) {
-    const amount = Math.ceil(Math.random()*100000) * 100;
+    const amount = Math.ceil(Math.random() * 100000) * 100;
     const createAccount = await accountModel.create({
       userId: createNewUser._id,
       balance: amount,
@@ -156,9 +156,14 @@ const searchUser = async (req, res) => {
     return res.status(411).json({ message: errorArr });
   }
   const filteredUser = await usermodel.find({
-    $or: [
-      { firstName: { $regex: result.data, $options: "i" } },
-      { lastName: { $regex: result.data, $options: "i" } },
+    $and: [
+      {
+        $or: [
+          { firstName: { $regex: result.data, $options: "i" } },
+          { lastName: { $regex: result.data, $options: "i" } },
+        ],
+      },
+      { _id: { $ne: req.userId } },
     ],
   });
   if (filteredUser.length) {
@@ -176,4 +181,17 @@ const searchUser = async (req, res) => {
   return res.status(400).json({ message: "User is not available!" });
 };
 
-module.exports = { signup, signin, updateUser, searchUser };
+const userDetails = async (req, res)=>{
+  try{
+    const user = await usermodel.findById(req.userId).select({firstName: 1, lastName: 1, username: 1});
+    if(user){
+      return res.status(200).json({user});
+    }
+    return res.status(400).json({message: "user details are not available!"})
+  }catch(error){
+    console.log(error);
+    return res.status(500).json({message: "Server is not responding!"})
+  }
+}
+
+module.exports = { signup, signin, updateUser, searchUser, userDetails };

@@ -18,6 +18,7 @@ const navigate = useNavigate();
         url: "/user/signin",
         method: "post",
         baseURL: "http://localhost:8000/api/v1",
+        // baseURL: "http://192.168.191.214:8000/api/v1",
         headers: {
           "content-type": "application/json",
         },
@@ -88,7 +89,7 @@ const navigate = useNavigate();
               />
             </div>
             <div className="mt-5">
-              <Button label={"Sign up"} onClick={signinFn} />
+              <Button label={"Sign In"} onClick={signinFn} />
             </div>
             <div>
               <BottomWarning

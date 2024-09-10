@@ -11,6 +11,7 @@ connectDB();
 
 app.use('/api/v1', router);
 
-app.listen(process.env.PORT, ()=>{
+// I have entered this '0.0.0.0', so that using IP address also we can be able to get the data from backend
+app.listen(process.env.PORT, '0.0.0.0', ()=>{
     console.log(`Server connected: ${process.env.PORT}`)
 })

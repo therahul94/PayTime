@@ -11,9 +11,11 @@
   },
   "dependencies": {
     "axios": "^1.7.5",
+    "dotenv": "^16.4.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.26.1",
+    "recoil": "^0.7.7",
     "sweetalert2": "^11.12.4"
   },
   "devDependencies": {
@@ -29,4 +31,6 @@
     "tailwindcss": "^3.4.10",
     "vite": "^5.0.8"
   }
+   
+
 }

@@ -1,18 +1,42 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "./Button";
+import axios from "axios";
 
 export default function Users() {
-  const navigate = useNavigate();
-  const [users, setUsers] = useState([
-    {
-      firstName: "Rahul",
-      lastName: "Kurmalkar",
-      id: 1,
-    },
-  ]);
+  const token = localStorage.getItem("token");
+  const [users, setUsers] = useState([]);
+  const [filter, setFilter] = useState("");
 
-  
+  const usersFn = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/api/v1/user/bulk?filter=" + filter,
+        // "http://192.168.191.214:8000/api/v1/user/bulk?filter=" + filter,
+        {
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (response.status === 200) {
+        setUsers(response.data.users);
+      }
+    } catch (error) {
+      console.log(error);
+      if (error.response.status === 400) {
+        setUsers([]);
+      }
+    }
+  };
+
+  useEffect(() => {
+    let timeoutid;
+    clearTimeout(timeoutid);
+    timeoutid = setTimeout(() => {
+      usersFn();
+    }, 500);
+  }, [filter]);
 
   return (
     <div>
@@ -20,12 +44,15 @@ export default function Users() {
       <input
         className="w-full border p-2 rounded-md"
         placeholder="Search users..."
+        onChange={(e) => {
+          setFilter(e.target.value);
+        }}
       />
       <div className="mt-5">
         {users?.map((user) => {
           return (
             <div className="my-3">
-              <Userlist firstName={user.firstName} lastName={user.lastName} />
+              <Userlist firstName={user.firstName} lastName={user.lastName} id={user._id}/>
             </div>
           );
         })}
@@ -34,7 +61,8 @@ export default function Users() {
   );
 }
 
-function Userlist({ firstName, lastName }) {
+function Userlist({ firstName, lastName, id }) {
+  const navigate = useNavigate();
   return (
     <div className="flex justify-between items-center h-full">
       <div className="flex justify-left items-center">
@@ -45,8 +73,11 @@ function Userlist({ firstName, lastName }) {
           {firstName} {lastName}
         </div>
       </div>
-      <div >
-        <Button label={"Send Money"}/>
+      <div>
+        <Button onClick={()=>navigate("/sendmoney", {state: {
+          receieverid: id,
+          receieverName: firstName
+        }})} label={"Send Money"} />
       </div>
     </div>
   );

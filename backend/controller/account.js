@@ -5,9 +5,8 @@ const getBalance = async (req, res) => {
   try {
     const balanceDetails = await accountModel.findOne({ userId: req.userId });
     // .select({ _id: 0, userId: 0, balance: 1 });
-    console.log("balanceDetails", balanceDetails);
     if (balanceDetails) {
-      return res.status(200).json({ balance: balanceDetails.balance / 100 });
+      return res.status(200).json({ balance: (balanceDetails.balance / 100).toFixed(2) });
     }
     return res
       .status(400)
@@ -49,7 +48,6 @@ const transfer = async (req, res) => {
       // console.log({ message: "Insufficient Balance" });
       // return ;
     }
-
     const transferToAccount = await accountModel
       .findOne({ userId: transferTo })
       .session(session);
