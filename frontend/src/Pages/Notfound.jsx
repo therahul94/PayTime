@@ -2,6 +2,7 @@ import React from 'react'
 
 export default function Notfound(){
   return (
-    <div>Notfound</div>
+    <div className="bg-[url('/Not-found404.webp')] h-screen w-50 bg-contain bg-no-repeat">
+    </div>
   )
 }

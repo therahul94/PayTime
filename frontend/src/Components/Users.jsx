@@ -1,61 +1,97 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "./Button";
-import axios from "axios";
+import { UsersFn } from "../Services/Operations/UserApis";
+import Pagination from "./Pagination";
 
 export default function Users() {
-  const token = localStorage.getItem("token");
   const [users, setUsers] = useState([]);
   const [filter, setFilter] = useState("");
+  const [CurrentPage, setCurrentPage] = useState(1);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
-  const usersFn = async () => {
+  const usersfn = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:8000/api/v1/user/bulk?filter=" + filter,
-        // "http://192.168.191.214:8000/api/v1/user/bulk?filter=" + filter,
-        {
-          headers: {
-            authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (response.status === 200) {
-        setUsers(response.data.users);
-      }
+      const response = await UsersFn(filter, CurrentPage);
+      setUsers(response.users);
+      setTotalUsers(response.totalUsers);
+      setTotalPages(response.totalPages);
     } catch (error) {
       console.log(error);
-      if (error.response.status === 400) {
-        setUsers([]);
-      }
     }
   };
 
   useEffect(() => {
-    let timeoutid;
+      usersfn();
+  }, [filter, CurrentPage]);
+
+  let timeoutid;
+  function handleSearchUser(e) {
     clearTimeout(timeoutid);
-    timeoutid = setTimeout(() => {
-      usersFn();
-    }, 500);
-  }, [filter]);
+    timeoutid = setTimeout(()=>{
+      setFilter(e.target.value);
+    }, 400);
+  }
+
 
   return (
     <div>
-      <div className="font-bold text-xl my-3">Users</div>
-      <input
-        className="w-full border p-2 rounded-md"
-        placeholder="Search users..."
-        onChange={(e) => {
-          setFilter(e.target.value);
-        }}
-      />
-      <div className="mt-5">
-        {users?.map((user) => {
-          return (
-            <div className="my-3">
-              <Userlist firstName={user.firstName} lastName={user.lastName} id={user._id}/>
+      <div className="font-bold text-lg md:text-xl my-3">Users</div>
+      <div className="flex items-center">
+        <span className="absolute pl-2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="size-4"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+            />
+          </svg>
+        </span>
+        <input
+          className="w-full border p-2 pl-9 rounded-md placeholder:italic"
+          placeholder="Search users..."
+          onChange={(e) => handleSearchUser(e)}
+        />
+      </div>
+
+      <div className=" ">
+        {typeof users === "object" && users.length ? (
+          users?.map((user) => {
+            return (
+              <div className="my-3" key={user._id}>
+                <Userlist
+                  firstName={user.firstName}
+                  lastName={user.lastName}
+                  id={user._id}
+                />
+              </div>
+            );
+          })
+        ) : (
+          <div className="h-max">
+            <div className="text-2xl opacity-45 text-center">
+              Users not found
             </div>
-          );
-        })}
+            <div className=" flex justify-center">
+              <img
+                className="w-72 h-72 opacity-45"
+                src="/No-data.png"
+                alt="No users available..."
+              />
+            </div>
+          </div>
+        )}
+      </div>
+      <div className="absolute bottom-0 right-0 px-5 ">
+        <Pagination CurrentPage={CurrentPage} setCurrentPage={setCurrentPage} totalPages = {totalPages}/>
       </div>
     </div>
   );
@@ -64,20 +100,27 @@ export default function Users() {
 function Userlist({ firstName, lastName, id }) {
   const navigate = useNavigate();
   return (
-    <div className="flex justify-between items-center h-full">
-      <div className="flex justify-left items-center">
-        <div className="w-12 h-12 rounded-full bg-slate-200 flex justify-center items-center">
-          <div className="font-semibold text-lg">{firstName[0]}</div>
+    <div className="grid grid-cols-12">
+      <div className="col-span-8 md:col-span-10 lg:col-span-11 flex items-center">
+        <div className="w-9 h-9 md:w-12 md:h-12 rounded-full bg-slate-200 flex justify-center items-center">
+          <div className="font-semibold text-sm md:text-lg">{firstName[0]}</div>
         </div>
-        <div className="ml-3 font-bold">
+        <div className=" ml-3 font-semibold text-sm md:text-lg">
           {firstName} {lastName}
         </div>
       </div>
-      <div>
-        <Button onClick={()=>navigate("/sendmoney", {state: {
-          receieverid: id,
-          receieverName: firstName
-        }})} label={"Send Money"} />
+      <div className="col-span-4 md:col-span-2 lg:col-span-1">
+        <Button
+          onClick={() =>
+            navigate("/sendmoney", {
+              state: {
+                receieverid: id,
+                receieverName: firstName,
+              },
+            })
+          }
+          label={"Send Money"}
+        />
       </div>
     </div>
   );

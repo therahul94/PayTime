@@ -1,24 +1,27 @@
-import React, { useEffect, useState } from "react";
-import Appbar from "../Components/Appbar";
-import Balance from "../Components/Balance";
-import Users from "../Components/Users";
-import {  userDetails } from "../Services/Operations/UserApis";
+import React, { lazy, Suspense, useEffect, useState } from "react";
+const Appbar = lazy(()=>import("../Components/Appbar"));
+const Balance = lazy(()=>import("../Components/Balance"));
+// import Users from "../Components/Users";
+const Users = lazy(() => import("../Components/Users"));
+import { userDetails } from "../Services/Operations/UserApis";
 import { getBalance } from "../Services/Operations/AccountApi";
-import { useRecoilState } from "recoil";
+import { useSetRecoilState } from "recoil";
 import { loggedInUseratom } from "../Store/atoms";
+import Userskelaton from "../Components/Skelaton/Userskelaton";
+import Balanceskelaton from "../Components/Skelaton/Balanceskelaton";
+import Headerskelaton from "../Components/Skelaton/Headerskelaton";
 
 export default function Dashboard() {
   const [balance, setBalance] = useState(0.0);
   async function getBalanceFn() {
     try {
       const response = await getBalance();
-        setBalance(response);
-      }
-    catch (error) {
+      setBalance(response);
+    } catch (error) {
       console.log(error);
     }
   }
-  const [loggedInUser, setloggedInUser] = useRecoilState(loggedInUseratom);
+  const setloggedInUser = useSetRecoilState(loggedInUseratom);
   async function getUserDetails() {
     try {
       const response = await userDetails();
@@ -33,15 +36,25 @@ export default function Dashboard() {
   }, []);
   return (
     <div>
-      <Appbar user={loggedInUser} />
-      <div className="p-5">
+      <Suspense fallback={<><Headerskelaton /></>}>
+        <Appbar />
+      </Suspense>
+
+      <div className="px-5">
         <div className="my-3">
-          <Balance value={balance} />
+          <Suspense fallback={<><Balanceskelaton /></>}>
+            <Balance value={balance} /> 
+          </Suspense>
         </div>
         <div className="my-5">
-          <Users />
+          <Suspense fallback={<><Userskelaton /></>}>
+            <Users />
+          </Suspense>
         </div>
       </div>
+      
+      
     </div>
   );
 }
+

@@ -4,6 +4,7 @@ const {
   userSigninValidation,
   updateUserValidation,
   searching,
+  usersCountLimit,
 } = require("../inputValidation");
 const { usermodel } = require("../model/user");
 const { accountModel } = require("../model/account");
@@ -148,6 +149,9 @@ const updateUser = async (req, res) => {
 
 const searchUser = async (req, res) => {
   const filter = req.query.filter || "";
+  const pagenumber = req.query.page || 1;
+  const limit = req.query.limit || 4;
+
   const result = searching(filter);
   if (!result.success) {
     const errorArr = result.error.issues?.map((val) => {
@@ -155,17 +159,36 @@ const searchUser = async (req, res) => {
     });
     return res.status(411).json({ message: errorArr });
   }
-  const filteredUser = await usermodel.find({
-    $and: [
-      {
-        $or: [
-          { firstName: { $regex: result.data, $options: "i" } },
-          { lastName: { $regex: result.data, $options: "i" } },
-        ],
-      },
-      { _id: { $ne: req.userId } },
-    ],
-  });
+
+  const result2 = usersCountLimit(limit, pagenumber);
+  if (!result2.success) {
+    const errorArr = result2.error.issues?.map((val) => {
+      message: val.message;
+    });
+    return res.status(411).json({ message: errorArr });
+  }
+
+  const skip = (pagenumber - 1) * limit;
+
+  const filteredUser = await usermodel
+    .find({
+      $and: [
+        {
+          $or: [
+            { firstName: { $regex: result.data, $options: "i" } },
+            { lastName: { $regex: result.data, $options: "i" } },
+          ],
+        },
+        { _id: { $ne: req.userId } },
+      ],
+    })
+    .skip(skip)
+    .limit(limit)
+    .lean()
+    .exec();
+  const totalUsers = await usermodel.countDocuments();
+  const totalPages = Math.ceil(totalUsers / limit);
+
   if (filteredUser.length) {
     return res.status(200).json({
       users: filteredUser.map((user) => {
@@ -176,22 +199,26 @@ const searchUser = async (req, res) => {
           _id: user._id,
         };
       }),
+      totalUsers,
+      totalPages,
     });
   }
-  return res.status(400).json({ message: "User is not available!" });
+  return res.status(400).json({ message: "Users are not available!" });
 };
 
-const userDetails = async (req, res)=>{
-  try{
-    const user = await usermodel.findById(req.userId).select({firstName: 1, lastName: 1, username: 1});
-    if(user){
-      return res.status(200).json({user});
+const userDetails = async (req, res) => {
+  try {
+    const user = await usermodel
+      .findById(req.userId)
+      .select({ firstName: 1, lastName: 1, username: 1 });
+    if (user) {
+      return res.status(200).json({ user });
     }
-    return res.status(400).json({message: "user details are not available!"})
-  }catch(error){
+    return res.status(400).json({ message: "user details are not available!" });
+  } catch (error) {
     console.log(error);
-    return res.status(500).json({message: "Server is not responding!"})
+    return res.status(500).json({ message: "Server is not responding!" });
   }
-}
+};
 
 module.exports = { signup, signin, updateUser, searchUser, userDetails };

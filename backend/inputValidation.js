@@ -100,14 +100,28 @@ const searching = (filter)=>{
   return res;
 }
 
+const usersCountLimit = (limit, pagenumber) => {
+  const limitSchema = zod.object({
+    limit: zod.coerce.number({
+      required_error: "limit is required",
+      invalid_type_error: "limit must be an number"
+    }).gte(1),
+    pagenumber: zod.coerce.number({
+      required_error: "Page number is required",
+      invalid_type_error: "Page number must be an number"
+    }).gte(1)
+  });
+  const res = limitSchema.safeParse({limit, pagenumber});
+  return res;
+}
+
 const transferMoneyValidation = (amount)=>{
   const transferSchema = zod.number({
     required_error: "amount is required",
     invalid_type_error: "amount must be an number"
   }).gte(0);
   const res = transferSchema.safeParse(amount);
-  console.log("res: ", res);
   return res;
 }
 
-module.exports = { userValidation, userSigninValidation,updateUserValidation,searching, transferMoneyValidation };
+module.exports = { userValidation, userSigninValidation,updateUserValidation,searching, transferMoneyValidation, usersCountLimit };
